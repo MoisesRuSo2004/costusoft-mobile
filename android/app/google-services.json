@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "980007827043",
+    "project_id": "costusoft",
+    "storage_bucket": "costusoft.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:980007827043:android:04b4b78a8b1ad847b12a56",
+        "android_client_info": {
+          "package_name": "com.costusoft.costusoft_mobile"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBvtgZjvwrVI_vibjWqkWLK6zDy8__qiF4"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

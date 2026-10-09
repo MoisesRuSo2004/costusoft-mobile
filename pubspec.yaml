@@ -1,0 +1,112 @@
+name: costusoft_mobile
+description: "CostuSoft Móvil — app móvil del sistema CostuSoft Control."
+publish_to: 'none'
+
+version: 1.0.0+1
+
+environment:
+  sdk: ^3.13.2
+
+dependencies:
+  flutter:
+    sdk: flutter
+  flutter_localizations:
+    sdk: flutter
+
+  # Estado e inyección de dependencias
+  flutter_riverpod: ^3.4.3
+  # Navegación
+  go_router: ^18.0.2
+  # Red
+  dio: ^5.11.1
+  jwt_decoder: ^2.0.1
+  # Almacenamiento
+  flutter_secure_storage: ^11.2.0
+  shared_preferences: ^2.5.6
+  # Modelos
+  freezed_annotation: ^3.1.0
+  json_annotation: ^4.12.0
+  # Utilidades
+  intl: ^0.20.3
+  logger: ^2.8.0
+  cupertino_icons: ^1.0.8
+  fl_chart: ^1.2.0
+  flutter_markdown_plus: ^1.0.12
+  mobile_scanner: ^7.4.2
+  qr_flutter: ^4.1.0
+  drift: ^2.35.2
+  drift_flutter: ^0.3.1
+  connectivity_plus: ^7.3.2
+  firebase_core: ^4.15.0
+  firebase_messaging: ^16.7.0
+  web: ^1.1.1
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^6.0.0
+  build_runner: ^2.16.2
+  freezed: ^4.0.2
+  json_serializable: ^6.14.1
+  mocktail: ^1.0.5
+  drift_dev: ^2.35.1
+  flutter_native_splash: ^2.4.8
+  flutter_launcher_icons: ^0.14.4
+
+dependency_overrides:
+  # path_provider_foundation 2.6.x depende de `objective_c`, cuyo build hook falla
+  # al compilar desde Windows (Flutter 3.47.x). Es la implementación iOS/macOS y no
+  # afecta Android; 2.5.1 no usa native assets. Retirar al actualizar Flutter.
+  path_provider_foundation: 2.5.1
+
+flutter:
+  uses-material-design: true
+
+  assets:
+    - assets/imagenes/
+    - assets/imagenes/intro/
+
+  # Poppins: la misma tipografía de la plataforma web (licencia OFL en assets/fuentes/OFL.txt)
+  fonts:
+    - family: Poppins
+      fonts:
+        - asset: assets/fuentes/Poppins-Regular.ttf
+          weight: 400
+        - asset: assets/fuentes/Poppins-Medium.ttf
+          weight: 500
+        - asset: assets/fuentes/Poppins-SemiBold.ttf
+          weight: 600
+        - asset: assets/fuentes/Poppins-Bold.ttf
+          weight: 700
+
+# Splash nativo: el azul de la marca desde el primer instante (antes de que
+# arranque Flutter). Después la CortinaInicio arma el logo sobre el mismo azul.
+# Regenerar con: dart run flutter_native_splash:create
+flutter_native_splash:
+  color: "#0B3D91"
+  android_12:
+    color: "#0B3D91"
+    # Sin imagen, Android 12+ mostraría el ícono del lanzador y luego la
+    # cortina lo "borraría" para armar el logo: se deja el azul liso.
+    image: assets/icono/splash_vacio.png
+    icon_background_color: "#0B3D91"
+  web: true
+  ios: true
+
+# Ícono de la app: isotipo de la plataforma web sobre el azul del domo.
+# Las imágenes salen de docs/icono/generar_icono.py.
+# Regenerar con: dart run flutter_launcher_icons
+flutter_launcher_icons:
+  image_path: assets/icono/icono_app.png
+  android: ic_launcher
+  min_sdk_android: 21
+  adaptive_icon_background: assets/icono/icono_fondo.png
+  adaptive_icon_foreground: assets/icono/icono_primer_plano.png
+  adaptive_icon_monochrome: assets/icono/icono_monocromo.png
+  ios: true
+  remove_alpha_ios: true
+  web:
+    generate: true
+    image_path: assets/icono/icono_app.png
+    background_color: "#0B3D91"
+    theme_color: "#0B3D91"
