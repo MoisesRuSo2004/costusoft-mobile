@@ -2,7 +2,7 @@ name: costusoft_mobile
 description: "CostuSoft Móvil — app móvil del sistema CostuSoft Control."
 publish_to: 'none'
 
-version: 1.0.0+1
+version: 1.1.0+2
 
 environment:
   sdk: ^3.13.2
@@ -42,6 +42,8 @@ dependencies:
   web: ^1.1.1
   share_plus: ^13.3.1
   flutter_local_notifications: ^22.3.1
+  ota_update: ^7.1.0
+  package_info_plus: ^10.2.2
 dev_dependencies:
   flutter_test:
     sdk: flutter

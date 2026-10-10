@@ -51,9 +51,9 @@ void main() {
       expect(mapearErrorDeRed(_respuestaConError(403)), isA<FalloPermiso>());
     });
 
-    test('503 → FalloServidor con el código', () {
+    test('503 → FalloServicioIniciando (un FalloServidor con el código)', () {
       final fallo = mapearErrorDeRed(_respuestaConError(503));
-      expect(fallo, isA<FalloServidor>());
+      expect(fallo, isA<FalloServicioIniciando>());
       expect((fallo as FalloServidor).codigoEstado, 503);
     });
 

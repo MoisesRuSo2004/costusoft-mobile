@@ -35,8 +35,6 @@ void main() {
         overrides: [proveedorSesion.overrideWith(() => sesion)],
         child: MaterialApp(
           home: GuardiaInactividad(
-            limite: const Duration(minutes: 30),
-            aviso: const Duration(minutes: 5),
             revision: const Duration(seconds: 1),
             ahora: () => reloj,
             child: const Scaffold(body: Center(child: Text('Inventario'))),

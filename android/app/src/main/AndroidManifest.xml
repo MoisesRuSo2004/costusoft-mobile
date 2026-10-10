@@ -1,7 +1,14 @@
-<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools">
     <uses-permission android:name="android.permission.INTERNET"/>
     <!-- Android 13+: permiso para mostrar los avisos de pedidos listos. -->
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS"/>
+    <!-- Actualizaciones de la app (ota_update): Android pide confirmar la instalación. -->
+    <uses-permission android:name="android.permission.REQUEST_INSTALL_PACKAGES"/>
+    <!-- El plugin los declara, pero no hacen falta: el APK se guarda en
+         almacenamiento interno y la app no es de sistema. -->
+    <uses-permission android:name="android.permission.INSTALL_PACKAGES" tools:node="remove"/>
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" tools:node="remove"/>
     <application
         android:label="CostuSoft"
         android:name="${applicationName}"
@@ -36,6 +43,20 @@
         <meta-data
             android:name="com.google.firebase.messaging.default_notification_color"
             android:resource="@color/notificacion_acento" />
+        <!-- Canal de importancia alta que crea CanalAvisos al abrir la app. -->
+        <meta-data
+            android:name="com.google.firebase.messaging.default_notification_channel_id"
+            android:value="avisos_costusoft" />
+        <!-- Actualizaciones: el instalador de Android lee el APK descargado. -->
+        <provider
+            android:name="sk.fourq.otaupdate.OtaUpdateFileProvider"
+            android:authorities="${applicationId}.ota_update_provider"
+            android:exported="false"
+            android:grantUriPermissions="true">
+            <meta-data
+                android:name="android.support.FILE_PROVIDER_PATHS"
+                android:resource="@xml/filepaths" />
+        </provider>
         <!-- Don't delete the meta-data below.
              This is used by the Flutter tool to generate GeneratedPluginRegistrant.java -->
         <meta-data
