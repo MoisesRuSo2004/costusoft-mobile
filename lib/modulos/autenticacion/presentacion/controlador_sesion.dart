@@ -85,6 +85,15 @@ class ControladorSesion extends Notifier<EstadoSesion> {
     state = const SinSesion(motivo: 'Cerraste sesión correctamente.');
   }
 
+  /// Cierre automático tras un tiempo sin usar la app ([GuardiaInactividad]).
+  /// Solo se borran los tokens: los datos sin enviar se conservan para cuando
+  /// el mismo usuario vuelva a entrar, y el teléfono sigue recibiendo avisos.
+  Future<void> cerrarPorInactividad() async {
+    if (state is! SesionActiva) return;
+    await _repositorio.cerrarSesion();
+    state = const SinSesion(motivo: 'Tu sesión se cerró por inactividad. Inicia sesión de nuevo.');
+  }
+
   /// La copia local y la bandeja de salida pertenecen a un usuario: si entra
   /// otro, se borran. También se descartan las copias viejas.
   Future<void> _prepararDatosLocales(Usuario usuario) async {

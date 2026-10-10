@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import 'modulos/autenticacion/presentacion/guardia_inactividad.dart';
 import 'modulos/bodega/presentacion/proveedores_bodega.dart';
 import 'modulos/carga/presentacion/cortina_inicio.dart';
 import 'modulos/inventario/presentacion/proveedores_inventario.dart';
@@ -50,7 +51,7 @@ class AplicacionCostuSoft extends ConsumerWidget {
       themeMode: ThemeMode.light,
       routerConfig: ref.watch(proveedorEnrutador),
       // La cortina de inicio tapa la app al abrirla y se retira sola.
-      builder: (_, enrutador) => CortinaInicio(child: enrutador ?? const SizedBox.shrink()),
+      builder: (_, enrutador) => CortinaInicio(child: GuardiaInactividad(child: enrutador ?? const SizedBox.shrink())),
       locale: const Locale('es', 'CO'),
       supportedLocales: const [Locale('es', 'CO'), Locale('es')],
       localizationsDelegates: GlobalMaterialLocalizations.delegates,

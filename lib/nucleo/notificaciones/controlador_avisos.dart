@@ -11,6 +11,7 @@ import '../red/cliente_http.dart';
 import '../rutas/enrutador_app.dart';
 import '../rutas/rutas_app.dart';
 import '../utilidades/registro_app.dart';
+import 'canal_avisos.dart';
 import 'escucha_web.dart';
 import 'servicio_notificaciones.dart';
 
@@ -104,6 +105,8 @@ final proveedorEscuchaAvisos = Provider<void>((ref) {
     refrescar(pedidoId);
     final aviso = mensaje.notification;
     if (aviso == null) return;
+    // Android: en la barra del sistema, como con la app cerrada.
+    if (CanalAvisos.mostrar(mensaje, pedidoId: pedidoId?.toString())) return;
     llaveMensajeroApp.currentState?.showSnackBar(
       SnackBar(
         duration: const Duration(seconds: 6),
@@ -115,13 +118,22 @@ final proveedorEscuchaAvisos = Provider<void>((ref) {
     );
   });
   final alTocar = FirebaseMessaging.onMessageOpenedApp.listen(abrirAviso);
+  // Aviso mostrado por CanalAvisos (app abierta) que el usuario tocó.
+  void abrirPedido(String? texto) {
+    final pedidoId = int.tryParse(texto ?? '');
+    refrescar(pedidoId);
+    abrir(pedidoId == null ? RutasApp.institucionPedidos : RutasApp.institucionSeguimiento(pedidoId));
+  }
+  CanalAvisos.alTocar = abrirPedido;
   ref.onDispose(() {
     unawaited(enPrimerPlano.cancel());
     unawaited(alTocar.cancel());
+    CanalAvisos.alTocar = null;
   });
 
   // La app se abrió tocando un aviso (estaba cerrada).
   unawaited(FirebaseMessaging.instance.getInitialMessage().then((m) => m == null ? null : abrirAviso(m)));
+  unawaited(CanalAvisos.pedidoDelAvisoInicial().then((p) => p == null ? null : abrirPedido(p)));
   // Web: clic en el aviso con la app abierta en otra pestaña.
   escucharRutasDelServiceWorker(abrir);
 });

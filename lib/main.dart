@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/date_symbol_data_local.dart';
 
 import 'aplicacion.dart';
+import 'nucleo/notificaciones/canal_avisos.dart';
 import 'nucleo/notificaciones/controlador_avisos.dart';
 import 'nucleo/notificaciones/servicio_notificaciones.dart';
 
@@ -11,6 +12,8 @@ Future<void> main() async {
   await initializeDateFormatting('es_CO');
   // Avisos push (Firebase). Si no se puede iniciar, la app funciona sin ellos.
   final firebaseDisponible = await iniciarFirebase();
+  // Canal de Android con importancia alta: los avisos salen arriba, con sonido.
+  if (firebaseDisponible) await CanalAvisos.iniciar();
   // Riverpod 3 reintenta solo los proveedores que fallan; aquí se desactiva:
   // los errores se muestran con un botón "Reintentar" y no se insiste en
   // segundo plano contra el backend.
