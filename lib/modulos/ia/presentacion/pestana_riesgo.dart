@@ -3,7 +3,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../compartido/widgets/aviso_despertando_motor.dart';
 import '../../../compartido/widgets/estados_pantalla.dart';
+import '../../../nucleo/red/despertar_motor.dart';
 import '../../../nucleo/rutas/rutas_app.dart';
 import '../../../nucleo/tema/colores_app.dart';
 import '../../../nucleo/utilidades/formatos.dart';
@@ -21,6 +23,7 @@ class PestanaRiesgo extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final predicciones = ref.watch(proveedorPredicciones);
+    final segundosDespertando = ref.watch(proveedorDespertarMotor);
 
     Future<void> actualizar() async {
       ref.invalidate(proveedorPredicciones);
@@ -38,6 +41,10 @@ class PestanaRiesgo extends ConsumerWidget {
         AsyncValue(:final value?) => _Contenido(predicciones: value),
         AsyncError(:final error) => ListView(
           children: [EstadoError(mensaje: mensajeDeError(error), alReintentar: actualizar)],
+        ),
+        _ when segundosDespertando != null => ListView(
+          padding: const EdgeInsets.all(20),
+          children: [AvisoDespertandoMotor(segundos: segundosDespertando)],
         ),
         _ => ListView(
           padding: const EdgeInsets.all(16),

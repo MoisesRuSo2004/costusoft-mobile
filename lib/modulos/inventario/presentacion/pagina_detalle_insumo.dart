@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../compartido/widgets/aviso_despertando_motor.dart';
 import '../../../compartido/widgets/estados_pantalla.dart';
 import '../../../nucleo/errores/fallo.dart';
+import '../../../nucleo/red/despertar_motor.dart';
 import '../../../nucleo/tema/colores_app.dart';
 import '../../../nucleo/utilidades/formatos.dart';
 import '../../autenticacion/dominio/estado_sesion.dart';
@@ -275,6 +277,7 @@ class _TarjetaAnalisisIa extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final prediccion = ref.watch(proveedorPrediccion(insumo.id));
+    final segundosDespertando = ref.watch(proveedorDespertarMotor);
 
     return _Seccion(
       titulo: 'Análisis de IA',
@@ -285,7 +288,11 @@ class _TarjetaAnalisisIa extends ConsumerWidget {
         AsyncError(:final error) => Column(
           children: [
             Text(
-              error is Fallo ? error.mensaje : 'No se pudo obtener la predicción.',
+              // Solo mensajes pensados para el usuario; nunca el detalle técnico.
+              switch (error) {
+                FalloServicioIniciando(:final mensaje) || FalloRed(:final mensaje) || FalloNoAutorizado(:final mensaje) => mensaje,
+                _ => 'No se pudo obtener el análisis de IA. Intenta de nuevo.',
+              },
               style: const TextStyle(color: ColoresApp.textoSecundario),
             ),
             const SizedBox(height: 8),
@@ -296,6 +303,7 @@ class _TarjetaAnalisisIa extends ConsumerWidget {
             ),
           ],
         ),
+        _ when segundosDespertando != null => AvisoDespertandoMotor(segundos: segundosDespertando),
         _ => const Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [

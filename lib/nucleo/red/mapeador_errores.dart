@@ -41,6 +41,7 @@ Fallo _falloDesdeRespuesta(Response<dynamic>? respuesta) {
     403 => mensajeBackend != null ? FalloPermiso(mensajeBackend) : const FalloPermiso(),
     404 => mensajeBackend != null ? FalloNoEncontrado(mensajeBackend) : const FalloNoEncontrado(),
     409 => FalloConflicto(mensajeBackend ?? 'Conflicto con el estado actual.'),
+    503 => mensajeBackend != null ? FalloServicioIniciando(mensajeBackend) : const FalloServicioIniciando(),
     >= 500 => FalloServidor(mensajeBackend ?? 'Ocurrió un error en el servidor. Intenta más tarde.', codigo),
     _ => FalloServidor(mensajeBackend ?? 'Respuesta inesperada ($codigo).', codigo),
   };

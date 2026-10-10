@@ -2,6 +2,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../nucleo/errores/resultado.dart';
 import '../../../nucleo/red/cliente_http.dart';
+import '../../../nucleo/red/despertar_motor.dart';
 import '../../autenticacion/dominio/rol_usuario.dart';
 import '../../autenticacion/presentacion/controlador_sesion.dart';
 import '../datos/fuente_remota_inventario.dart';
@@ -59,7 +60,7 @@ class ControladorPredicciones extends AsyncNotifier<List<PrediccionInsumo>> {
   @override
   Future<List<PrediccionInsumo>> build() async {
     if (!ref.watch(proveedorVeAnalisisIa)) return const [];
-    return _datosOLanzar(await ref.read(proveedorRepositorioInventario).obtenerPredicciones());
+    return conMotorDespierto(ref, ref.read(proveedorRepositorioInventario).obtenerPredicciones);
   }
 }
 
@@ -165,6 +166,8 @@ final proveedorInsumo = FutureProvider.autoDispose.family<Insumo, int>((ref, id)
   return _datosOLanzar(await ref.read(proveedorRepositorioInventario).obtenerInsumo(id));
 });
 
+/// Si el motor de predicción está dormido, espera a que despierte (ver
+/// [conMotorDespierto]) en vez de mostrar el error.
 final proveedorPrediccion = FutureProvider.autoDispose.family<PrediccionInsumo, int>(
-  (ref, insumoId) async => _datosOLanzar(await ref.read(proveedorRepositorioInventario).obtenerPrediccion(insumoId)),
+  (ref, insumoId) => conMotorDespierto(ref, () => ref.read(proveedorRepositorioInventario).obtenerPrediccion(insumoId)),
 );

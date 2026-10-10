@@ -50,6 +50,12 @@ final class FalloConflicto extends Fallo {
   const FalloConflicto(super.mensaje);
 }
 
+/// 503 — un servicio de apoyo (p. ej. el motor de predicción) está
+/// arrancando. Es temporal: conviene reintentar en unos segundos.
+final class FalloServicioIniciando extends Fallo {
+  const FalloServicioIniciando([super.mensaje = 'El servicio se está iniciando. Intenta de nuevo en unos segundos.']);
+}
+
 /// 5xx o respuesta inesperada del servidor.
 final class FalloServidor extends Fallo {
   const FalloServidor([super.mensaje = 'Ocurrió un error en el servidor. Intenta más tarde.', this.codigoEstado]);
