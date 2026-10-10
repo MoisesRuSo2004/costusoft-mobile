@@ -63,6 +63,7 @@ Future<T> conMotorDespierto<T>(
 }) async {
   final inicio = DateTime.now();
   var esperando = false;
+  var espera = pausa;
   final despertar = ref.read(proveedorDespertarMotor.notifier);
   try {
     while (true) {
@@ -82,7 +83,9 @@ Future<T> conMotorDespierto<T>(
             esperando = true;
             despertar._empezar();
           }
-          await Future<void>.delayed(pausa);
+          await Future<void>.delayed(espera);
+          // Espera progresiva: Render limita (429) a quien insiste muy seguido.
+          espera = Duration(milliseconds: (espera.inMilliseconds * 1.5).round().clamp(0, 20000));
           // La pantalla se cerró mientras esperaba: no seguir despertando.
           if (!ref.mounted) throw const FalloInesperado('La consulta se canceló.');
       }

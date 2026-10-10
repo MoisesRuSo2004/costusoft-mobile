@@ -62,9 +62,8 @@ final class FalloServidor extends Fallo {
 /// [FalloServidor], así que lo que ya reintenta los 5xx (la sincronización
 /// sin conexión) lo sigue haciendo.
 final class FalloServicioIniciando extends FalloServidor {
-  const FalloServicioIniciando([
-    String mensaje = 'El servicio se está iniciando. Intenta de nuevo en unos segundos.',
-  ]) : super(mensaje, 503);
+  const FalloServicioIniciando([String mensaje = 'El servicio se está iniciando. Intenta de nuevo en unos segundos.'])
+    : super(mensaje, 503);
 }
 
 final class FalloInesperado extends Fallo {

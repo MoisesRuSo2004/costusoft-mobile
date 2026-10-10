@@ -72,9 +72,8 @@ class _HojaEtiquetaQrState extends State<_HojaEtiquetaQr> {
       );
     } catch (_) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('No se pudo compartir la etiqueta. Intenta de nuevo.')),
-        );
+        ScaffoldMessenger.of(context)
+            .showSnackBar(const SnackBar(content: Text('No se pudo compartir la etiqueta. Intenta de nuevo.')));
       }
     } finally {
       if (mounted) setState(() => _compartiendo = false);

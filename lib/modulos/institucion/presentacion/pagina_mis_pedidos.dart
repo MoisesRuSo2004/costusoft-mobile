@@ -4,9 +4,8 @@ import 'package:go_router/go_router.dart';
 
 import '../../../compartido/widgets/encabezado_rol.dart';
 import '../../../compartido/widgets/estados_pantalla.dart';
+import '../../../compartido/widgets/tarjeta_avisos.dart';
 import '../../../nucleo/errores/fallo.dart';
-import '../../../nucleo/notificaciones/controlador_avisos.dart';
-import '../../../nucleo/notificaciones/servicio_notificaciones.dart';
 import '../../../nucleo/rutas/rutas_app.dart';
 import '../../../nucleo/tema/colores_app.dart';
 import '../../../nucleo/tema/paleta_rol.dart';
@@ -74,7 +73,7 @@ class PaginaMisPedidos extends ConsumerWidget {
                   AsyncValue(:final value?) => Column(
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
-                      const _TarjetaAvisos(),
+                      const TarjetaAvisos(),
                       if (listos != null && listos.isNotEmpty) ...[
                         _AvisoListos(listos: listos, alTocar: () => abrir(listos.first)),
                         const SizedBox(height: 20),
@@ -293,92 +292,6 @@ class _TarjetaEnCurso extends StatelessWidget {
               ),
             ],
           ),
-        ),
-      ),
-    );
-  }
-}
-
-/// Invita a activar los avisos push ("tu pedido está listo"). El permiso se
-/// pide al tocar el botón: los navegadores lo exigen así y es más claro para
-/// el usuario saber para qué se le pide.
-class _TarjetaAvisos extends ConsumerWidget {
-  const _TarjetaAvisos();
-
-  Future<void> _activar(BuildContext context, WidgetRef ref) async {
-    await ref.read(proveedorAvisos.notifier).activar();
-    if (!context.mounted) return;
-    final activos = ref.read(proveedorAvisos).value == EstadoAvisos.activos;
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(
-          activos
-              ? 'Listo: te avisaremos cuando tus pedidos estén listos.'
-              : 'No se activaron los avisos. Puedes hacerlo luego desde la configuración.',
-        ),
-      ),
-    );
-  }
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final avisos = ref.watch(proveedorAvisos);
-    final acento = ref.watch(proveedorPaletaRol).acento;
-    final (titulo, texto, mostrarBoton) = switch (avisos.value) {
-      EstadoAvisos.sinPreguntar => (
-        'Activa los avisos',
-        'Te avisamos al instante cuando tus uniformes estén listos para entrega.',
-        true,
-      ),
-      EstadoAvisos.bloqueados => (
-        'Avisos bloqueados',
-        'Para recibirlos, permite las notificaciones de CostuSoft en la configuración del teléfono o del navegador.',
-        false,
-      ),
-      _ => (null, null, false),
-    };
-    if (titulo == null) return const SizedBox.shrink();
-
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 20),
-      child: Container(
-        padding: const EdgeInsets.fromLTRB(14, 14, 14, 12),
-        decoration: BoxDecoration(
-          color: ref.watch(proveedorPaletaRol).acentoSuave,
-          borderRadius: BorderRadius.circular(14),
-          border: Border.all(color: acento.withValues(alpha: 0.25)),
-        ),
-        child: Row(
-          children: [
-            Icon(
-              mostrarBoton ? Icons.notifications_active_outlined : Icons.notifications_off_outlined,
-              color: acento,
-              size: 26,
-            ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(titulo, style: const TextStyle(fontSize: 14.5, fontWeight: FontWeight.w700)),
-                  const SizedBox(height: 2),
-                  Text(texto!, style: const TextStyle(fontSize: 12.5, color: ColoresApp.textoEtiqueta, height: 1.35)),
-                ],
-              ),
-            ),
-            if (mostrarBoton) ...[
-              const SizedBox(width: 10),
-              FilledButton(
-                onPressed: avisos.isLoading ? null : () => _activar(context, ref),
-                style: FilledButton.styleFrom(
-                  backgroundColor: acento,
-                  minimumSize: const Size(0, 40),
-                  padding: const EdgeInsets.symmetric(horizontal: 16),
-                ),
-                child: const Text('Activar'),
-              ),
-            ],
-          ],
         ),
       ),
     );

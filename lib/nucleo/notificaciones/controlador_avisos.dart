@@ -6,6 +6,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../modulos/autenticacion/dominio/rol_usuario.dart';
 import '../../modulos/autenticacion/presentacion/controlador_sesion.dart';
+import '../../modulos/bodega/presentacion/proveedores_bodega.dart';
 import '../../modulos/institucion/presentacion/proveedores_institucion.dart';
 import '../red/cliente_http.dart';
 import '../rutas/enrutador_app.dart';
@@ -25,7 +26,7 @@ final proveedorServicioNotificaciones = Provider<ServicioNotificaciones>(
 /// Mensajero global para mostrar los avisos que llegan con la app abierta.
 final llaveMensajeroApp = GlobalKey<ScaffoldMessengerState>();
 
-/// Solo el rol Institución recibe avisos: "tu pedido está listo".
+/// Avisos push para los roles de [rolesConAvisos].
 final proveedorAvisos = AsyncNotifierProvider<ControladorAvisos, EstadoAvisos>(ControladorAvisos.new);
 
 class ControladorAvisos extends AsyncNotifier<EstadoAvisos> {
@@ -34,7 +35,7 @@ class ControladorAvisos extends AsyncNotifier<EstadoAvisos> {
   @override
   Future<EstadoAvisos> build() async {
     final rol = ref.watch(proveedorRolActual);
-    if (!ref.watch(proveedorFirebaseDisponible) || rol != RolUsuario.institucion) return EstadoAvisos.noDisponible;
+    if (!ref.watch(proveedorFirebaseDisponible) || !rolesConAvisos.contains(rol)) return EstadoAvisos.noDisponible;
 
     final estado = await _servicio.consultarPermiso();
     if (estado == EstadoAvisos.activos) await _registrar();
@@ -60,6 +61,18 @@ class ControladorAvisos extends AsyncNotifier<EstadoAvisos> {
     }
   }
 
+  /// Aviso de prueba a este usuario. Devuelve a cuántos dispositivos se
+  /// entregó, o `null` si no se pudo enviar.
+  Future<int?> enviarPrueba() async {
+    try {
+      await _servicio.registrarDispositivo(); // por si el token cambió
+      return await _servicio.enviarPrueba();
+    } on Object catch (e) {
+      registroApp.w('No se pudo enviar el aviso de prueba: $e');
+      return null;
+    }
+  }
+
   /// Se llama antes de cerrar sesión (aún con el token de acceso vigente).
   Future<void> darDeBaja() async {
     if (state.value != EstadoAvisos.activos) return;
@@ -71,22 +84,44 @@ class ControladorAvisos extends AsyncNotifier<EstadoAvisos> {
   }
 }
 
-int? _pedidoDe(RemoteMessage mensaje) => int.tryParse('${mensaje.data['pedidoId'] ?? ''}');
+/// Roles que reciben avisos push: Institución ("tu pedido está listo") y
+/// Bodega ("nueva entrada/salida por confirmar").
+const rolesConAvisos = {RolUsuario.institucion, RolUsuario.bodega};
 
-/// Atiende los avisos: con la app abierta muestra un aviso en pantalla y
-/// refresca los pedidos; al tocar la notificación abre el seguimiento.
-/// Se activa desde `AplicacionCostuSoft`.
+/// Pantalla que abre un aviso al tocarlo, según su tipo (`null`: ninguna).
+String? rutaDeAviso(Map<String, dynamic> datos) {
+  switch (datos['tipo']) {
+    case 'MOVIMIENTO_PENDIENTE':
+      return RutasApp.bodegaPendientes;
+    case 'PEDIDO_LISTO':
+      final pedidoId = int.tryParse('${datos['pedidoId'] ?? ''}');
+      return pedidoId == null ? RutasApp.institucionPedidos : RutasApp.institucionSeguimiento(pedidoId);
+    default:
+      return null; // aviso de prueba u otro sin pantalla propia
+  }
+}
+
+/// Atiende los avisos: con la app abierta los muestra (barra del sistema en
+/// Android, mensaje en pantalla en web) y refresca los datos afectados; al
+/// tocar la notificación abre su pantalla. Se activa desde `AplicacionCostuSoft`.
 final proveedorEscuchaAvisos = Provider<void>((ref) {
   if (!ref.watch(proveedorFirebaseDisponible)) return;
 
-  void refrescar(int? pedidoId) {
-    ref
-      ..invalidate(proveedorPedidosInstitucion)
-      ..invalidate(proveedorPerfilInstitucion);
-    if (pedidoId != null) {
-      ref
-        ..invalidate(proveedorPedidoInstitucion(pedidoId))
-        ..invalidate(proveedorHistorialInstitucion(pedidoId));
+  void refrescar(Map<String, dynamic> datos) {
+    switch (datos['tipo']) {
+      case 'MOVIMIENTO_PENDIENTE':
+        ref
+          ..invalidate(proveedorMovimientosPendientes)
+          ..invalidate(proveedorHistorialMovimientos);
+      case 'PEDIDO_LISTO':
+        ref
+          ..invalidate(proveedorPedidosInstitucion)
+          ..invalidate(proveedorPerfilInstitucion);
+        if (int.tryParse('${datos['pedidoId'] ?? ''}') case final pedidoId?) {
+          ref
+            ..invalidate(proveedorPedidoInstitucion(pedidoId))
+            ..invalidate(proveedorHistorialInstitucion(pedidoId));
+        }
     }
   }
 
@@ -94,37 +129,29 @@ final proveedorEscuchaAvisos = Provider<void>((ref) {
   // la ruta pedida y lleva allí al terminar.
   void abrir(String ruta) => ref.read(proveedorEnrutador).go(ruta);
 
-  void abrirAviso(RemoteMessage mensaje) {
-    final pedidoId = _pedidoDe(mensaje);
-    refrescar(pedidoId);
-    abrir(pedidoId == null ? RutasApp.institucionPedidos : RutasApp.institucionSeguimiento(pedidoId));
+  void abrirDatos(Map<String, dynamic> datos) {
+    refrescar(datos);
+    if (rutaDeAviso(datos) case final ruta?) abrir(ruta);
   }
 
   final enPrimerPlano = FirebaseMessaging.onMessage.listen((mensaje) {
-    final pedidoId = _pedidoDe(mensaje);
-    refrescar(pedidoId);
+    refrescar(mensaje.data);
     final aviso = mensaje.notification;
     if (aviso == null) return;
     // Android: en la barra del sistema, como con la app cerrada.
-    if (CanalAvisos.mostrar(mensaje, pedidoId: pedidoId?.toString())) return;
+    if (CanalAvisos.mostrar(mensaje)) return;
+    final ruta = rutaDeAviso(mensaje.data);
     llaveMensajeroApp.currentState?.showSnackBar(
       SnackBar(
         duration: const Duration(seconds: 6),
         content: Text('${aviso.title ?? 'CostuSoft'}\n${aviso.body ?? ''}'.trim()),
-        action: pedidoId == null
-            ? null
-            : SnackBarAction(label: 'Ver', onPressed: () => abrir(RutasApp.institucionSeguimiento(pedidoId))),
+        action: ruta == null ? null : SnackBarAction(label: 'Ver', onPressed: () => abrir(ruta)),
       ),
     );
   });
-  final alTocar = FirebaseMessaging.onMessageOpenedApp.listen(abrirAviso);
+  final alTocar = FirebaseMessaging.onMessageOpenedApp.listen((m) => abrirDatos(m.data));
   // Aviso mostrado por CanalAvisos (app abierta) que el usuario tocó.
-  void abrirPedido(String? texto) {
-    final pedidoId = int.tryParse(texto ?? '');
-    refrescar(pedidoId);
-    abrir(pedidoId == null ? RutasApp.institucionPedidos : RutasApp.institucionSeguimiento(pedidoId));
-  }
-  CanalAvisos.alTocar = abrirPedido;
+  CanalAvisos.alTocar = abrirDatos;
   ref.onDispose(() {
     unawaited(enPrimerPlano.cancel());
     unawaited(alTocar.cancel());
@@ -132,8 +159,8 @@ final proveedorEscuchaAvisos = Provider<void>((ref) {
   });
 
   // La app se abrió tocando un aviso (estaba cerrada).
-  unawaited(FirebaseMessaging.instance.getInitialMessage().then((m) => m == null ? null : abrirAviso(m)));
-  unawaited(CanalAvisos.pedidoDelAvisoInicial().then((p) => p == null ? null : abrirPedido(p)));
+  unawaited(FirebaseMessaging.instance.getInitialMessage().then((m) => m == null ? null : abrirDatos(m.data)));
+  unawaited(CanalAvisos.datosDelAvisoInicial().then((d) => d == null ? null : abrirDatos(d)));
   // Web: clic en el aviso con la app abierta en otra pestaña.
   escucharRutasDelServiceWorker(abrir);
 });

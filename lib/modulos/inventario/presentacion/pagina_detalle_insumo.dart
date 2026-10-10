@@ -290,7 +290,9 @@ class _TarjetaAnalisisIa extends ConsumerWidget {
             Text(
               // Solo mensajes pensados para el usuario; nunca el detalle técnico.
               switch (error) {
-                FalloServicioIniciando(:final mensaje) || FalloRed(:final mensaje) || FalloNoAutorizado(:final mensaje) => mensaje,
+                FalloServicioIniciando(:final mensaje) ||
+                FalloRed(:final mensaje) ||
+                FalloNoAutorizado(:final mensaje) => mensaje,
                 _ => 'No se pudo obtener el análisis de IA. Intenta de nuevo.',
               },
               style: const TextStyle(color: ColoresApp.textoSecundario),

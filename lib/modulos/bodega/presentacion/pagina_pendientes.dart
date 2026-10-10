@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../../compartido/widgets/encabezado_rol.dart';
 import '../../../compartido/widgets/estados_pantalla.dart';
+import '../../../compartido/widgets/tarjeta_avisos.dart';
 import '../../../nucleo/errores/fallo.dart';
 import '../../../nucleo/red/respuesta_api.dart';
 import '../../../nucleo/rutas/rutas_app.dart';
@@ -56,6 +57,8 @@ class PaginaPendientes extends ConsumerWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
+                  // "Activa los avisos": te llega cada entrada o salida nueva.
+                  const TarjetaAvisos(),
                   const _Titulo(
                     texto: 'Por verificar',
                     detalle: 'Entradas y salidas registradas que esperan tu confirmación',

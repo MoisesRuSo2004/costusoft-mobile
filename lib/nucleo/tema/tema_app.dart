@@ -140,7 +140,8 @@ abstract final class TemaApp {
         showDragHandle: true,
       ),
       navigationBarTheme: NavigationBarThemeData(
-        height: 68,
+        // Compacta: Bodega y Administrador tienen 5 pestañas con nombres largos.
+        height: 64,
         elevation: 0,
         backgroundColor: ColoresApp.fondo,
         surfaceTintColor: Colors.transparent,
@@ -148,15 +149,17 @@ abstract final class TemaApp {
         labelBehavior: NavigationDestinationLabelBehavior.alwaysShow,
         iconTheme: WidgetStateProperty.resolveWith(
           (estados) => IconThemeData(
-            size: 24,
+            size: 22,
             color: estados.contains(WidgetState.selected) ? ColoresApp.verde : ColoresApp.textoTenue,
           ),
         ),
         labelTextStyle: WidgetStateProperty.resolveWith(
           (estados) => TextStyle(
             fontFamily: fuente,
-            fontSize: 11.5,
-            fontWeight: estados.contains(WidgetState.selected) ? FontWeight.w600 : FontWeight.w500,
+            fontSize: 11,
+            letterSpacing: 0,
+            // Sin negrita: el color del rol ya marca la pestaña activa.
+            fontWeight: estados.contains(WidgetState.selected) ? FontWeight.w500 : FontWeight.w400,
             color: estados.contains(WidgetState.selected) ? ColoresApp.verde : ColoresApp.textoSecundario,
           ),
         ),

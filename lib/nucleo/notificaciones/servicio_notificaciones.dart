@@ -75,6 +75,12 @@ class ServicioNotificaciones {
     await _cliente.delete<void>('/api/notificaciones/dispositivos', data: {'token': token});
   }
 
+  /// Aviso de prueba a los dispositivos del usuario en sesión.
+  Future<int> enviarPrueba() async {
+    final respuesta = await _cliente.post<Map<String, dynamic>>('/api/notificaciones/prueba');
+    return (respuesta.data?['data'] as num?)?.toInt() ?? 0;
+  }
+
   /// Firebase renueva el token cada cierto tiempo.
   Stream<String> get tokenRenovado => _mensajeria.onTokenRefresh;
 }

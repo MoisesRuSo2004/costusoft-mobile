@@ -57,18 +57,23 @@ class MarcoNavegacion extends ConsumerWidget {
                       base.labelTextStyle?.resolve(estados)?.copyWith(color: seleccionado(estados) ? activo : null),
                 ),
               ),
-              child: NavigationBar(
-                selectedIndex: navegacion.currentIndex,
-                onDestinationSelected: _irA,
-                destinations: [
-                  for (final destino in destinos)
-                    NavigationDestination(
-                      icon: Icon(destino.icono),
-                      selectedIcon: Icon(destino.iconoSeleccionado),
-                      label: destino.etiqueta,
-                      tooltip: destino.etiqueta,
-                    ),
-                ],
+              // Con la letra del sistema muy grande, las etiquetas se cortaban:
+              // dentro de la barra el agrandado se limita a +15 %.
+              child: MediaQuery.withClampedTextScaling(
+                maxScaleFactor: 1.15,
+                child: NavigationBar(
+                  selectedIndex: navegacion.currentIndex,
+                  onDestinationSelected: _irA,
+                  destinations: [
+                    for (final destino in destinos)
+                      NavigationDestination(
+                        icon: Icon(destino.icono),
+                        selectedIcon: Icon(destino.iconoSeleccionado),
+                        label: destino.etiqueta,
+                        tooltip: destino.etiqueta,
+                      ),
+                  ],
+                ),
               ),
             ),
           ),

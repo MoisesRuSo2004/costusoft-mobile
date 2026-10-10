@@ -52,7 +52,9 @@ class _AvisoActualizacionState extends ConsumerState<AvisoActualizacion> with Wi
             left: 12,
             right: 12,
             bottom: 12,
-            child: SafeArea(child: _TarjetaActualizacion(estado: estado, controlador: _controlador)),
+            child: SafeArea(
+              child: _TarjetaActualizacion(estado: estado, controlador: _controlador),
+            ),
           ),
       ],
     );
@@ -125,7 +127,10 @@ class _TarjetaActualizacion extends StatelessWidget {
               ConstrainedBox(
                 constraints: const BoxConstraints(maxHeight: 120),
                 child: SingleChildScrollView(
-                  child: Text(notas, style: const TextStyle(fontSize: 13, color: ColoresApp.textoEtiqueta, height: 1.4)),
+                  child: Text(
+                    notas,
+                    style: const TextStyle(fontSize: 13, color: ColoresApp.textoEtiqueta, height: 1.4),
+                  ),
                 ),
               ),
             ],
@@ -137,7 +142,10 @@ class _TarjetaActualizacion extends StatelessWidget {
                   child: LinearProgressIndicator(value: porcentaje / 100, minHeight: 6),
                 ),
                 const SizedBox(height: 6),
-                Text('Descargando… $porcentaje %', style: const TextStyle(fontSize: 12.5, color: ColoresApp.textoSecundario)),
+                Text(
+                  'Descargando… $porcentaje %',
+                  style: const TextStyle(fontSize: 12.5, color: ColoresApp.textoSecundario),
+                ),
                 const SizedBox(height: 4),
               ],
               InstalandoActualizacion() => [

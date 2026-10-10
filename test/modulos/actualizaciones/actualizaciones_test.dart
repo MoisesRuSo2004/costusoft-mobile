@@ -15,7 +15,8 @@ Map<String, dynamic> _release({String etiqueta = 'v1.1.0', bool conApk = true}) 
     if (conApk)
       {
         'name': 'costusoft-1.1.0.apk',
-        'browser_download_url': 'https://github.com/MoisesRuSo2004/costusoft-mobile/releases/download/v1.1.0/costusoft-1.1.0.apk',
+        'browser_download_url':
+            'https://github.com/MoisesRuSo2004/costusoft-mobile/releases/download/v1.1.0/costusoft-1.1.0.apk',
         'size': 52428800,
         'digest': 'sha256:abc123',
       },

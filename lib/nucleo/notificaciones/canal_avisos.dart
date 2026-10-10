@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:convert';
 import 'dart:ui' show Color;
 
 import 'package:firebase_messaging/firebase_messaging.dart';
@@ -23,9 +24,18 @@ abstract final class CanalAvisos {
   static final _plugin = FlutterLocalNotificationsPlugin();
   static bool _listo = false;
 
-  /// Llamado al tocar un aviso mostrado con la app abierta (recibe el
-  /// `pedidoId` como texto, o vacío).
-  static void Function(String? pedidoId)? alTocar;
+  /// Llamado al tocar un aviso mostrado con la app abierta (recibe los datos
+  /// del push: tipo, pedidoId, movimientoId…).
+  static void Function(Map<String, dynamic> datos)? alTocar;
+
+  static Map<String, dynamic>? _datos(String? payload) {
+    if (payload == null || payload.isEmpty) return null;
+    try {
+      return (jsonDecode(payload) as Map).cast<String, dynamic>();
+    } on Object {
+      return null;
+    }
+  }
 
   static bool get _esAndroid => !kIsWeb && defaultTargetPlatform == TargetPlatform.android;
 
@@ -35,17 +45,14 @@ abstract final class CanalAvisos {
     try {
       await _plugin.initialize(
         settings: const InitializationSettings(android: AndroidInitializationSettings('ic_notificacion')),
-        onDidReceiveNotificationResponse: (respuesta) => alTocar?.call(respuesta.payload),
+        onDidReceiveNotificationResponse: (respuesta) {
+          if (_datos(respuesta.payload) case final datos?) alTocar?.call(datos);
+        },
       );
       await _plugin
           .resolvePlatformSpecificImplementation<AndroidFlutterLocalNotificationsPlugin>()
           ?.createNotificationChannel(
-            const AndroidNotificationChannel(
-              id,
-              _nombre,
-              description: _descripcion,
-              importance: Importance.high,
-            ),
+            const AndroidNotificationChannel(id, _nombre, description: _descripcion, importance: Importance.high),
           );
       _listo = true;
     } on Object catch (e) {
@@ -54,15 +61,15 @@ abstract final class CanalAvisos {
   }
 
   /// La app se abrió tocando un aviso mostrado por [mostrar].
-  static Future<String?> pedidoDelAvisoInicial() async {
+  static Future<Map<String, dynamic>?> datosDelAvisoInicial() async {
     if (!_listo) return null;
     final detalles = await _plugin.getNotificationAppLaunchDetails();
-    return detalles?.didNotificationLaunchApp == true ? detalles?.notificationResponse?.payload : null;
+    return detalles?.didNotificationLaunchApp == true ? _datos(detalles?.notificationResponse?.payload) : null;
   }
 
   /// Muestra en la barra del sistema un push recibido con la app abierta.
   /// Devuelve `false` si no se pudo (web, o canal sin preparar).
-  static bool mostrar(RemoteMessage mensaje, {String? pedidoId}) {
+  static bool mostrar(RemoteMessage mensaje) {
     final aviso = mensaje.notification;
     if (!_listo || aviso == null) return false;
     unawaited(
@@ -81,7 +88,7 @@ abstract final class CanalAvisos {
             color: Color(0xFF0891B2),
           ),
         ),
-        payload: pedidoId,
+        payload: jsonEncode(mensaje.data),
       ),
     );
     return true;

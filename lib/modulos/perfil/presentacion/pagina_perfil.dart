@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../compartido/widgets/avatar_usuario.dart';
 import '../../../compartido/widgets/aviso_en_linea.dart';
 import '../../../compartido/widgets/encabezado_rol.dart';
+import '../../../compartido/widgets/tarjeta_avisos.dart';
 import '../../../nucleo/sin_conexion/sincronizacion.dart';
 import '../../../nucleo/tema/colores_app.dart';
 import '../../../nucleo/tema/paleta_rol.dart';
@@ -100,6 +101,7 @@ class PaginaPerfil extends ConsumerWidget {
                         title: Text('Sesión protegida'),
                         subtitle: Text('Tus credenciales se guardan cifradas y la sesión se renueva sola.'),
                       ),
+                      const FilaAvisosPerfil(),
                     ],
                   ),
                 ),
